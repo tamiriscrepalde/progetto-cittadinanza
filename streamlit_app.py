@@ -45,47 +45,52 @@ else:
     st.session_state.kinship_selected = False
 
 if st.session_state.kinship_selected:
-    if st.session_state.form_page > 0:
+    st.text(
+        f"Página {st.session_state.form_page} de {st.session_state.total_pages}."
+    )
+    if st.session_state.form_page == 0:
+        st.text("Informações do Dante Causa")
+    else:
         st.text(f"Page {st.session_state.form_page}")
 
-        degree = st.session_state.total_pages - st.session_state.form_page + 1
+    degree = st.session_state.total_pages - st.session_state.form_page - 1
 
-        name = st.text_input(
-            f"Nome completo (Grau {degree}):")
-        date_birth = st.date_input(
-            f"Data de nascimento (Grau {degree}):")
-        place_birth = st.text_input(
-            f"Local de nascimento (Grau {degree}):")
+    name = st.text_input(
+        f"Nome completo (Grau {degree}):")
+    date_birth = st.date_input(
+        f"Data de nascimento (Grau {degree}):")
+    place_birth = st.text_input(
+        f"Local de nascimento (Grau {degree}):")
 
-        is_deceased = st.checkbox("É falecido(a)?")
-        if is_deceased:
-            date_death = st.date_input(
-                f"Data de falecimento (Grau {degree}):")
-            place_death = st.text_input(
-                f"Local de falecimento (Grau {degree}):")
+    is_deceased = st.checkbox("É falecido(a)?")
+    if is_deceased:
+        date_death = st.date_input(
+            f"Data de falecimento (Grau {degree}):")
+        place_death = st.text_input(
+            f"Local de falecimento (Grau {degree}):")
 
-        is_married = st.checkbox("Adicionar informações de conjuge?")
-        if is_married:
-            spouse_name = st.text_input("Nome completo do conjuge:")
-            spouse_date_birth = st.date_input("Data de nascimento:")
-            spouse_place_birth = st.text_input("Local de nascimento:")
+    is_married = st.checkbox("Adicionar informações de conjuge?")
+    if is_married:
+        spouse_name = st.text_input("Nome completo do conjuge:")
+        spouse_date_birth = st.date_input("Data de nascimento:")
+        spouse_place_birth = st.text_input("Local de nascimento:")
 
-            spouse_is_deceased = st.checkbox("É falecido?")
-            if spouse_is_deceased:
-                spouse_date_death = st.date_input("Data de falecimento:")
-                spouse_place_death = st.text_input("Local de falecimento:")
+        spouse_is_deceased = st.checkbox("É falecido?")
+        if spouse_is_deceased:
+            spouse_date_death = st.date_input("Data de falecimento:")
+            spouse_place_death = st.text_input("Local de falecimento:")
 
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            if st.button("Voltar") and st.session_state.form_page > 1:
-                previous_page()
-        with col2:
-            if st.session_state.form_page < st.session_state.total_pages:
-                if st.button("Próxima"):
-                    next_page()
-            elif st.session_state.form_page == st.session_state.total_pages:
-                if st.button("Finalizar"):
-                    st.success("Formulário enviado com sucesso!")
-                    st.session_state.form_page = 0
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Voltar") and st.session_state.form_page > 1:
+            previous_page()
+    with col2:
+        if st.session_state.form_page < st.session_state.total_pages:
+            if st.button("Próxima"):
+                next_page()
+        elif st.session_state.form_page == st.session_state.total_pages:
+            if st.button("Finalizar"):
+                st.success("Formulário enviado com sucesso!")
+                st.session_state.form_page = 0
 else:
     st.info("Por favor, selecione o grau de parentesco para continuar.")
