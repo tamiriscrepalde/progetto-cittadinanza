@@ -34,7 +34,9 @@ kinship = {
 }
 
 dante_kinship = st.selectbox(
-    "Informe o grau de parentesco relativo ao seu Dante Causa:", list(kinship.keys()))
+    "Informe o grau de parentesco relativo ao seu Dante Causa:",
+    list(kinship.keys())
+)
 
 if dante_kinship != "Selecione":
     st.session_state.kinship_selected = True
@@ -44,16 +46,8 @@ else:
 
 if st.session_state.kinship_selected:
     if st.session_state.form_page > 0:
-        if st.session_state.form_page == 2:
-            st.markdown(
-                "<h3 style='font-size:20px; color:white; text-align:left;'>Insira abaixo as informações do seu Dante Causa.</h3>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                "<h3 style='font-size:20px; color:white; text-align:left;'>Insira abaixo as informações do seu [].</h3>",
-                unsafe_allow_html=True
-            )
+        st.text(f"Page {st.session_state.form_page}")
+
         degree = st.session_state.total_pages - st.session_state.form_page + 1
 
         name = st.text_input(
@@ -93,5 +87,5 @@ if st.session_state.kinship_selected:
                 if st.button("Finalizar"):
                     st.success("Formulário enviado com sucesso!")
                     st.session_state.form_page = 0
-    else:
-        st.info("Por favor, selecione o grau de parentesco para continuar.")
+else:
+    st.info("Por favor, selecione o grau de parentesco para continuar.")
