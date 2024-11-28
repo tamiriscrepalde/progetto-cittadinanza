@@ -1,96 +1,77 @@
 import streamlit as st
 
+from cfg import kinship
+from src.inputs.ancestor_info import ancestor_inputs
+from src.inputs.dante_info import dante_inputs
+from src.inputs.user_info import user_inputs
+
 st.title("Progetto di cittadinanza")
 
-st.markdown(
-    "<h3 style='font-size:20px; color:white; text-align:left;'>Preencha as informações abaixo para gerar sua árvore genealógica.</h3>",
-    unsafe_allow_html=True
-)
-st.divider()
-
-
+# Inicializa as variáveis de estado da sessão
 if "form_page" not in st.session_state:
     st.session_state.form_page = 0
 
-if "total_pages" not in st.session_state:
-    st.session_state.total_pages = 0
+if "kinship_selected" not in st.session_state:
+    st.session_state.kinship_selected = False
+
+
+# Funções para controle de navegação
+def reset_form():
+    st.session_state.form_page = 0
+    st.session_state.kinship_selected = st.session_state.dante_kinship != "Selecione"
+    if st.session_state.kinship_selected:
+        # +2 para o Dante e o usuário
+        st.session_state.total_pages = kinship[st.session_state.dante_kinship] + 2
+    else:
+        st.session_state.total_pages = 0
 
 
 def next_page():
-    st.session_state.form_page += 1
+    if st.session_state.form_page < st.session_state.total_pages - 1:
+        st.session_state.form_page += 1
 
 
 def previous_page():
-    st.session_state.form_page -= 1
+    if st.session_state.form_page > 0:
+        st.session_state.form_page -= 1
 
 
-kinship = {
-    "Selecione": 0,
-    "Pai/Mãe": 1,
-    "Avô/Avó": 2,
-    "Bisavô/Bisavó": 3,
-    "Triavô/Triavó": 4,
-    "Tetravô/Tetravó": 5,
-}
+# Menu suspenso com callback para redefinir o formulário
+if 'dante_kinship' not in st.session_state:
+    st.session_state.dante_kinship = 'Selecione'
 
-dante_kinship = st.selectbox(
+st.selectbox(
     "Informe o grau de parentesco relativo ao seu Dante Causa:",
-    list(kinship.keys())
+    options=list(kinship.keys()),
+    key='dante_kinship',
+    on_change=reset_form
 )
-
-if dante_kinship != "Selecione":
-    st.session_state.kinship_selected = True
-    st.session_state.total_pages = kinship[dante_kinship] + 1
-else:
-    st.session_state.kinship_selected = False
 
 if st.session_state.kinship_selected:
     st.text(
-        f"Página {st.session_state.form_page} de {st.session_state.total_pages}."
-    )
+        f"Página {st.session_state.form_page + 1} de {st.session_state.total_pages}.")
+
+    # Lógica para determinar qual formulário exibir
     if st.session_state.form_page == 0:
-        st.text("Informações do Dante Causa")
+        # Primeira página: informações do Dante
+        data = dante_inputs()
+    elif st.session_state.form_page == st.session_state.total_pages - 1:
+        # Última página: informações do usuário
+        data = user_inputs()
     else:
-        st.text(f"Page {st.session_state.form_page}")
+        # Páginas intermediárias: informações dos ancestrais
+        degree = st.session_state.total_pages - st.session_state.form_page - 1
+        data = ancestor_inputs(degree)
 
-    degree = st.session_state.total_pages - st.session_state.form_page - 1
-
-    name = st.text_input(
-        f"Nome completo (Grau {degree}):")
-    date_birth = st.date_input(
-        f"Data de nascimento (Grau {degree}):")
-    place_birth = st.text_input(
-        f"Local de nascimento (Grau {degree}):")
-
-    is_deceased = st.checkbox("É falecido(a)?")
-    if is_deceased:
-        date_death = st.date_input(
-            f"Data de falecimento (Grau {degree}):")
-        place_death = st.text_input(
-            f"Local de falecimento (Grau {degree}):")
-
-    is_married = st.checkbox("Adicionar informações de conjuge?")
-    if is_married:
-        spouse_name = st.text_input("Nome completo do conjuge:")
-        spouse_date_birth = st.date_input("Data de nascimento:")
-        spouse_place_birth = st.text_input("Local de nascimento:")
-
-        spouse_is_deceased = st.checkbox("É falecido?")
-        if spouse_is_deceased:
-            spouse_date_death = st.date_input("Data de falecimento:")
-            spouse_place_death = st.text_input("Local de falecimento:")
-
+    # Botões de navegação
     col1, col2 = st.columns([1, 1])
     with col1:
-        if st.button("Voltar") and st.session_state.form_page > 1:
-            previous_page()
+        st.button("Voltar", on_click=previous_page,
+                  disabled=st.session_state.form_page == 0)
     with col2:
-        if st.session_state.form_page < st.session_state.total_pages:
-            if st.button("Próxima"):
-                next_page()
-        elif st.session_state.form_page == st.session_state.total_pages:
-            if st.button("Finalizar"):
-                st.success("Formulário enviado com sucesso!")
-                st.session_state.form_page = 0
+        if st.session_state.form_page < st.session_state.total_pages - 1:
+            st.button("Próxima", on_click=next_page)
+        elif st.session_state.form_page == st.session_state.total_pages - 1:
+            st.button("Finalizar", on_click=next_page)
 else:
     st.info("Por favor, selecione o grau de parentesco para continuar.")
